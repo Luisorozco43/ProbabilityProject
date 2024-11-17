@@ -85,7 +85,7 @@ class Player(object):
         return True
 
     # Display all the cards in the players hand
-    def showHand(self):
+    def show_hand(self):
         print("{}'s hand: {}".format(self.name, self.hand))
         return self
 
