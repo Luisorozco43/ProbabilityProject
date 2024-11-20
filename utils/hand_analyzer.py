@@ -89,4 +89,4 @@ class HandAnalyzer(object):
 if __name__ == "__main__":
     probabilities = HandAnalyzer.calculate_hand_probabilities()
     for hand, probability in probabilities.items():
-        print(f"{hand}: {probability:.4f}%")
+        print(f"{hand}: {probability:.2f}%")
