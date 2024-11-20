@@ -1,8 +1,7 @@
 import random
-#from itertools import combinations
+import matplotlib.pyplot as plt
 from utils.hand_analyzer import HandAnalyzer
 from utils.hand_rankings import HandRanks
-
 
 class ProbabilityCalculator:
     """
@@ -26,15 +25,11 @@ class ProbabilityCalculator:
             float: Probability (as a percentage) of achieving the target hand rank.
         """
         deck = match.deck  # Use the existing deck from the match
-        known_cards = match.get_full_hand(
-            player_index
-        )  # Player's hand + community cards
+        known_cards = match.get_full_hand(player_index)  # Player's hand + community cards
         remaining_deck = [card for card in deck.cards if card not in known_cards]
 
         community_cards = match.get_community_cards()
-        needed_cards = 5 - len(
-            community_cards
-        )  # Number of community cards yet to be dealt
+        needed_cards = 5 - len(community_cards)  # Number of community cards yet to be dealt
         target_hands_count = 0
         total_samples = 0
 
@@ -60,6 +55,24 @@ class ProbabilityCalculator:
         return probability
 
     @staticmethod
+    def plot_probability_tree(probabilities):
+        """
+        Dibuja un diagrama de árbol con las probabilidades condicionales.
+        """
+        stages = ['Inicio', 'Flop', 'Turn', 'River']  # Etapas del juego
+        plt.figure(figsize=(10, 6))
+
+        for i, prob in enumerate(probabilities):
+            plt.plot([i, i], [0, prob], label=f'{stages[i]}', marker='o')
+
+        plt.xlabel('Etapas del Juego')
+        plt.ylabel('Probabilidad (%)')
+        plt.title('Diagrama de Probabilidad Condicional')
+        plt.grid(True)
+        plt.legend()
+        plt.show()
+
+    @staticmethod
     def menu(match, player_index):
         """
         Display a menu for selecting a target hand rank and calculate its probability.
@@ -80,10 +93,26 @@ class ProbabilityCalculator:
             except (ValueError, KeyError):
                 print("Por favor ingresa una opción válida.")
 
-        # Calculate the probability
+        # Calcular la probabilidad
         probability = ProbabilityCalculator.calculate_probability(
             match, player_index, target_hand_rank
         )
         print(
             f"\nProbabilidad de obtener {HandRanks.get_name(target_hand_rank)}: {probability:.2f}%"
         )
+
+        # Registrar las probabilidades en cada etapa
+        probabilities = [probability]  # Inicializamos con la probabilidad antes del flop
+
+        # Después de cada etapa, recalculamos las probabilidades
+        match.draw_flop()
+        probabilities.append(ProbabilityCalculator.calculate_probability(match, player_index, target_hand_rank))
+
+        match.draw_turn()
+        probabilities.append(ProbabilityCalculator.calculate_probability(match, player_index, target_hand_rank))
+
+        match.draw_river()
+        probabilities.append(ProbabilityCalculator.calculate_probability(match, player_index, target_hand_rank))
+
+        # Mostrar el diagrama de probabilidad
+        ProbabilityCalculator.plot_probability_tree(probabilities)
