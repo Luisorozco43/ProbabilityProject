@@ -8,30 +8,33 @@ from utils.probability_calculator import ProbabilityCalculator
 colorama.init(autoreset=True)
 ABORT_MATCH_MESSAGE = "La partida ha terminado"
 
-
 # Start the match
 def main():
     """
     Entry point of the game
     """
-    name = str(input("Cual es tu nombre (por defecto 'Jugador')=> "))
+    # Solicitar el nombre del jugador
+    name = input("Cual es tu nombre (por defecto 'Jugador') => ").strip()
+    
+    # Si el nombre está vacío, asignamos 'Jugador' como predeterminado
+    if not name:
+        name = "Jugador"
+
     match = Match()
     computer = Player("Computadora")
-    player = Player(name if name else "Jugador")
+    player = Player(name)
     players = [computer, player]
     match.start(players)
 
     # Hole cards
     match.draw_hole_cards()
-    
-    ProbabilityCalculator.menu(match, 1)
+    ProbabilityCalculator.menu(match, 1)  # Aquí se calcula la probabilidad del jugador
 
     # Flop
     match.draw_flop()
     if match.await_option() is False:
         print(Fore.RED + ABORT_MATCH_MESSAGE)
         return
-
     ProbabilityCalculator.menu(match, 1)
 
     # Turn
@@ -39,7 +42,6 @@ def main():
     if match.await_option() is False:
         print(Fore.RED + ABORT_MATCH_MESSAGE)
         return
-
     ProbabilityCalculator.menu(match, 1)
 
     # River
@@ -48,7 +50,7 @@ def main():
         print(Fore.RED + ABORT_MATCH_MESSAGE)
         return
 
-    # Showdown
+    # Final Showdown
     winner = match.showdown()
     if winner:
         OutputFormatter.print_winner("player")

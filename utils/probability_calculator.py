@@ -1,14 +1,12 @@
 import random
-#from itertools import combinations
+import matplotlib.pyplot as plt
 from utils.hand_analyzer import HandAnalyzer
 from utils.hand_rankings import HandRanks
 
-
 class ProbabilityCalculator:
-    """
-    Utility class for calculating the probability of getting a specific poker hand.
-    Optimized for better performance by sampling a subset of possibilities.
-    """
+
+    stages = ["Hole Cards", "Flop", "Turn", "River"]
+    probabilties = []
 
     SAMPLE_SIZE = 10000  # Define a fixed number of samples for simulation
 
@@ -26,15 +24,11 @@ class ProbabilityCalculator:
             float: Probability (as a percentage) of achieving the target hand rank.
         """
         deck = match.deck  # Use the existing deck from the match
-        known_cards = match.get_full_hand(
-            player_index
-        )  # Player's hand + community cards
+        known_cards = match.get_full_hand(player_index)  # Player's hand + community cards
         remaining_deck = [card for card in deck.cards if card not in known_cards]
 
         community_cards = match.get_community_cards()
-        needed_cards = 5 - len(
-            community_cards
-        )  # Number of community cards yet to be dealt
+        needed_cards = 5 - len(community_cards)  # Number of community cards yet to be dealt
         target_hands_count = 0
         total_samples = 0
 
@@ -60,30 +54,50 @@ class ProbabilityCalculator:
         return probability
 
     @staticmethod
+    def show_graph(probabilities):
+        """
+        Show the graph based on the provided probabilities at each stage.
+        This will handle up to 4 stages (Hole Cards, Flop, Turn, River).
+        """
+        stages = ['Hole Cards', 'Flop', 'Turn', 'River']  # Game stages
+        plt.figure(figsize=(10, 6))
+
+        # Ensure we only plot the number of stages matching the number of probabilities
+        for i, prob in enumerate(probabilities):
+            plt.plot([i, i], [0, prob], label=f'{stages[i]}', marker='o')
+
+        plt.xlabel('Game Stages')
+        plt.ylabel('Probability (%)')
+        plt.title('Conditional Probability Tree')
+        plt.grid(True)
+        plt.legend()
+        plt.show()
+
+    @staticmethod
     def menu(match, player_index):
         """
         Display a menu for selecting a target hand rank and calculate its probability.
-
+        
         Args:
             match (Match): The current Match instance.
             player_index (int): Index of the player for whom the probability is calculated.
         """
-        print("\n--- Calcular Probabilidades ---")
+        print("\n--- Calculate Probabilities ---")
         for rank in HandRanks:
             print(f"{rank.value}. {HandRanks.get_name(rank)}")
 
         while True:
             try:
-                choice = int(input("\nSelecciona el rango de mano deseado (1-10): "))
+                choice = int(input("\nSelect the desired hand rank (1-10): "))
                 target_hand_rank = HandRanks(choice)
                 break
             except (ValueError, KeyError):
-                print("Por favor ingresa una opción válida.")
+                print("Please enter a valid option.")
 
-        # Calculate the probability
-        probability = ProbabilityCalculator.calculate_probability(
-            match, player_index, target_hand_rank
-        )
-        print(
-            f"\nProbabilidad de obtener {HandRanks.get_name(target_hand_rank)}: {probability:.2f}%"
-        )
+        # Calculate probability for Hole Cards
+        probability = ProbabilityCalculator.calculate_probability(match, player_index, target_hand_rank)
+        print(f"\nProbability of getting {HandRanks.get_name(target_hand_rank)}: {probability:.2f}%")
+        
+        # Add the probability for Hole Cards to the list
+        ProbabilityCalculator.probabilties.append(probability)
+        ProbabilityCalculator.show_graph(ProbabilityCalculator.probabilties)
