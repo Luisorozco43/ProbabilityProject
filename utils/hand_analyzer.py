@@ -1,6 +1,8 @@
 from itertools import combinations
 from collections import Counter
 from utils.hand_rankings import HandRanks
+from treys import Deck, Evaluator
+import random
 
 class HandAnalyzer(object):
     """
@@ -8,6 +10,7 @@ class HandAnalyzer(object):
     which the hole cards given to the player 
     and the community cards
     """
+
     @staticmethod
     def is_flush(cards):
         """Check if all cards have the same suit."""
@@ -65,3 +68,25 @@ class HandAnalyzer(object):
         """Find the best 5-card hand from the 7 available cards."""
         best = max(combinations(cards, 5), key=lambda hand: HandAnalyzer.hand_rank(hand).value)
         return best, HandAnalyzer.hand_rank(best)
+
+    @staticmethod
+    def calculate_hand_probabilities(num_simulations=1000000):
+        """Calculate the probabilities of each hand type by simulating poker hands."""
+        hand_counts = Counter()
+        evaluator = Evaluator()
+
+        for _ in range(num_simulations):
+            deck = Deck()
+            deck.shuffle()
+            cards = [deck.draw(1) for _ in range(7)]
+            hand_rank = evaluator.evaluate(cards[:2], cards[2:])
+            hand_counts[hand_rank] += 1
+
+        probabilities = {hand: (count / num_simulations) * 100 for hand, count in hand_counts.items()}
+        return probabilities
+
+# Example usage
+if __name__ == "__main__":
+    probabilities = HandAnalyzer.calculate_hand_probabilities()
+    for hand, probability in probabilities.items():
+        print(f"{hand}: {probability:.4f}%")

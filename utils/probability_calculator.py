@@ -49,8 +49,8 @@ class ProbabilityCalculator:
 
         # Calculate probability
         probability = (
-            (target_hands_count / total_samples) * 100 if total_samples > 0 else 0
-        )
+          float((target_hands_count / total_samples) * 100 if total_samples > 0 else 0
+        ))
         return probability
 
     @staticmethod
@@ -96,8 +96,9 @@ class ProbabilityCalculator:
 
         # Calculate probability for Hole Cards
         probability = ProbabilityCalculator.calculate_probability(match, player_index, target_hand_rank)
-        print(f"\nProbability of getting {HandRanks.get_name(target_hand_rank)}: {probability:.2f}%")
+        print(f"\nProbability of getting {HandRanks.get_name(target_hand_rank)}: {probability:.7f}%")
         
         # Add the probability for Hole Cards to the list
         ProbabilityCalculator.probabilties.append(probability)
         ProbabilityCalculator.show_graph(ProbabilityCalculator.probabilties)
+        

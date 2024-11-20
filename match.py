@@ -104,7 +104,9 @@ class Match(object):
         # Position 0 of the player's list belongs to the computer
         player = self.players[PLAYER]
         OutputFormatter.print_community_cards(community_cards)
+        computer = self.players[COMPUTER]
         OutputFormatter.print_player_hand(player)
+        OutputFormatter.print_player_hand(computer)
         while True:
             command = str(input("Deseas continuar? (s|n) ")).strip().lower()
             if command not in ("s", "n"):
@@ -119,16 +121,20 @@ class Match(object):
         player_hand.extend(self.get_community_cards())
         return player_hand
 
+    def get_best_hand_and_rank(self, player_index):
+        """Helper method to get the best hand and rank for a player."""
+        full_hand = self.get_full_hand(player_index)
+        best_hand, hand_rank = HandAnalyzer.best_hand(full_hand)
+        return best_hand, hand_rank
+
     def showdown(self):
-        """Chooses a winner or verifies if there is a tie"""
-        # Get player's best hand
-        player_best_hand, player_rank = HandAnalyzer.best_hand(
-            self.get_full_hand(PLAYER)
-        )
-        # Get computer's best hand
-        computer_best_hand, computer_rank = HandAnalyzer.best_hand(
-            self.get_full_hand(COMPUTER)
-        )
+        """Chooses a winner or verifies if there is a tie."""
+        # Get player's best hand and rank
+        player_best_hand, player_rank = self.get_best_hand_and_rank(PLAYER)
+        # Get computer's best hand and rank
+        computer_best_hand, computer_rank = self.get_best_hand_and_rank(COMPUTER)
+
+        # Print best hands
         OutputFormatter.print_best_hand(self.players[PLAYER].name, player_rank)
         OutputFormatter.print_best_hand(self.players[COMPUTER].name, computer_rank)
 
@@ -139,22 +145,18 @@ class Match(object):
             return False  # Computer wins
         else:
             # If ranks are the same, compare card values
-            player_sorted = sorted(
-                (card.value for card in player_best_hand), reverse=True
-            )
-            computer_sorted = sorted(
-                (card.value for card in computer_best_hand), reverse=True
-            )
+            player_sorted = sorted((card.value for card in player_best_hand), reverse=True)
+            computer_sorted = sorted((card.value for card in computer_best_hand), reverse=True)
 
-        # Compare each card in order
-        for p_card, c_card in zip(player_sorted, computer_sorted):
-            if p_card > c_card:
-                return True  # Player wins
-            elif p_card < c_card:
-                return False  # Computer wins
+            # Compare each card in order
+            for player_card, computer_card in zip(player_sorted, computer_sorted):
+                if player_card > computer_card:
+                    return True  # Player wins
+                elif player_card < computer_card:
+                    return False  # Computer wins
 
-        # If all cards are equal, it's a tie
-        return None
+            # If all cards are equal, it's a tie
+            return None
 
     def start(self, players):
         """Fills the player's list"""
