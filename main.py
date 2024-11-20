@@ -46,10 +46,9 @@ def play_round(match):
 
     # River
     match.draw_river()
-    if not match.await_option():
+    if match.await_option() is False:
         print(Fore.RED + ABORT_MATCH_MESSAGE)
-        return False
-    ProbabilityCalculator.menu(match, 1)
+        return
 
     return True
 
