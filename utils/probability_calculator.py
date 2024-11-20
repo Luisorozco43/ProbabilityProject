@@ -9,7 +9,7 @@ class ProbabilityCalculator:
     Optimized for better performance by sampling a subset of possibilities.
     """
 
-    SAMPLE_SIZE = 10000  # Define a fixed number of samples for simulation
+    SAMPLE_SIZE = 100000  # Define a fixed number of samples for simulation
 
     @staticmethod
     def calculate_probability(match, player_index, target_hand_rank):
@@ -105,13 +105,13 @@ class ProbabilityCalculator:
         probabilities = [probability]  # Inicializamos con la probabilidad antes del flop
 
         # Después de cada etapa, recalculamos las probabilidades
-        match.draw_flop()
+        #match.draw_flop()
         probabilities.append(ProbabilityCalculator.calculate_probability(match, player_index, target_hand_rank))
 
-        match.draw_turn()
+        #match.draw_turn()
         probabilities.append(ProbabilityCalculator.calculate_probability(match, player_index, target_hand_rank))
 
-        match.draw_river()
+        #match.draw_river()
         probabilities.append(ProbabilityCalculator.calculate_probability(match, player_index, target_hand_rank))
 
         # Mostrar el diagrama de probabilidad
